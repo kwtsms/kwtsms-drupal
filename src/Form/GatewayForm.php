@@ -154,7 +154,8 @@ class GatewayForm extends FormBase {
       $form['test_card']['test_phone'] = [
         '#type'        => 'textfield',
         '#title'       => $this->t('Phone Number'),
-        '#description' => $this->t('Enter the recipient phone number in international format (e.g. 96598765432).'),
+        // 2026-11-05 11:11 +03: example uses the placeholder 965XXXXXXXX, the old sample mobile number belongs to a real person, int-testnumber
+        '#description' => $this->t('Enter the recipient phone number in international format (e.g. 965XXXXXXXX).'),
         '#maxlength'   => 20,
       ];
 

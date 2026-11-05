@@ -401,8 +401,8 @@ msgstr "غير معروف"
 msgid "Message"
 msgstr "الرسالة"
 
-msgid "Enter the recipient phone number in international format (e.g. 96598765432)."
-msgstr "أدخل رقم هاتف المستلم بالصيغة الدولية (مثال: 96598765432)."
+msgid "Enter the recipient phone number in international format (e.g. 965XXXXXXXX)."
+msgstr "أدخل رقم هاتف المستلم بالصيغة الدولية (مثال: 965XXXXXXXX)."
 
 # Gateway form OTP/login
 msgid "Send Reset Code"

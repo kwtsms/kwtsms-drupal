@@ -2,6 +2,11 @@
 
 All notable changes to the kwtSMS module will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- Docs and examples use the placeholder 965XXXXXXXX instead of a sample mobile number.
+
 ## [1.1.0] - 2026-04-05
 
 ### Added
