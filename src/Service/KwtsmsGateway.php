@@ -45,6 +45,14 @@ class KwtsmsGateway {
   private const ERR013_BACKOFF = [30, 60, 120];
 
   /**
+   * User-Agent sent to the kwtSMS API, built on first use.
+   *
+   * 2026-11-05 14:56 +03: added so kwtSMS can count accounts per integration
+   * (name and version only, no personal data), #939.
+   */
+  private ?string $userAgent = NULL;
+
+  /**
    * Constructs a KwtsmsGateway instance.
    *
    * @param \GuzzleHttp\ClientInterface $httpClient
@@ -690,6 +698,35 @@ class KwtsmsGateway {
   }
 
   /**
+   * Returns the User-Agent token this module sends: kwtsms-drupal/<version>.
+   *
+   * The version is the one drupal.org packaging writes into kwtsms.info.yml;
+   * a git checkout has none there, so composer.json extra.drupal.version is
+   * used instead.
+   * 2026-11-05 14:56 +03: added for per-integration counts (no personal
+   * data), #939.
+   *
+   * @return string
+   *   The User-Agent value.
+   */
+  public function getUserAgent(): string {
+    if ($this->userAgent === NULL) {
+      $dir = dirname(__DIR__, 2);
+      $version = '';
+      $info = @file_get_contents($dir . '/kwtsms.info.yml');
+      if (is_string($info) && preg_match('/^version:\s*[\'"]?([^\'"\s]+)/m', $info, $m)) {
+        $version = $m[1];
+      }
+      if ($version === '') {
+        $composer = json_decode((string) @file_get_contents($dir . '/composer.json'), TRUE);
+        $version = (string) ($composer['extra']['drupal']['version'] ?? '0');
+      }
+      $this->userAgent = 'kwtsms-drupal/' . preg_replace('/[^0-9A-Za-z.+-]/', '', $version);
+    }
+    return $this->userAgent;
+  }
+
+  /**
    * Sends a raw HTTP POST request to a kwtSMS API endpoint.
    *
    * Uses Guzzle with a 30-second timeout and always sends Content-Type and
@@ -707,10 +744,13 @@ class KwtsmsGateway {
     $url = self::API_BASE . ltrim($endpoint, '/');
 
     try {
+      // 2026-11-05 14:56 +03: User-Agent identifies the module and its
+      // version to kwtSMS, #939.
       $response = $this->httpClient->request('POST', $url, [
         'headers' => [
           'Content-Type' => 'application/json',
           'Accept'       => 'application/json',
+          'User-Agent'   => $this->getUserAgent(),
         ],
         'json'    => $payload,
         'timeout' => 30,
