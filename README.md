@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme-header-dark.png">
+  <img alt="kwtSMS: SMS gateway for Kuwait" src=".github/assets/readme-header-light.png">
+</picture>
+
 # kwtSMS for Drupal
 
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
@@ -5,13 +10,11 @@
 [![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-777BB4.svg)](https://www.php.net)
 [![kwtSMS](https://img.shields.io/badge/Gateway-kwtSMS.com-FFA200.svg)](https://www.kwtsms.com)
 
-SMS gateway integration with [kwtSMS.com](https://www.kwtsms.com) for Drupal 10.3+ and 11. OTP login, two-factor authentication, password reset via SMS, user registration notifications, and Commerce order alerts.
+Add SMS login codes, two-factor authentication, password reset by SMS and Drupal Commerce order SMS to your Drupal 10.3
+or 11 site, through kwtSMS, the Kuwaiti SMS gateway.
 
-## About kwtSMS
-
-[kwtSMS](https://www.kwtsms.com) is a Kuwait-based SMS gateway providing reliable A2P (Application-to-Person) messaging services. It supports SMS delivery to Kuwait and 200+ countries, with features including sender ID registration, delivery reports for international messages, and a REST/JSON API.
-
-- **Other Integrations**: [kwtsms.com/integrations.html](https://www.kwtsms.com/integrations.html)
+kwtSMS delivers to Zain, Ooredoo, stc and Virgin in Kuwait and to more than 200 countries, with your own Sender ID,
+free API testing and credits that do not expire.
 
 ## Features
 
@@ -53,7 +56,7 @@ SMS gateway integration with [kwtSMS.com](https://www.kwtsms.com) for Drupal 10.
 
 - Drupal 10.3 or 11
 - PHP 8.2+
-- A [kwtSMS.com](https://www.kwtsms.com) account with API access
+- A kwtSMS account (free test account, no papers): https://www.kwtsms.com/cportal/signup/
 
 **Optional:**
 - [Drupal Commerce](https://www.drupal.org/project/commerce): enable the `kwtsms_commerce` submodule for order notifications
@@ -107,7 +110,7 @@ kwtsms/                          Base module (standalone)
 
 **kwtsms_smsframework** registers kwtSMS as an SMS Framework gateway plugin, allowing other modules that use SMS Framework to send messages through kwtSMS. Requires the [SMS Framework](https://www.drupal.org/project/smsframework) module.
 
-## Multilingual Support
+## Arabic and multilingual
 
 - Admin UI: English and Arabic translations included (`translations/kwtsms.ar.po`)
 - SMS templates: separate EN and AR body text per template
@@ -138,14 +141,27 @@ See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 - SMS delivery analytics dashboard (success rates, trends)
 - Audit log with export for compliance
 
+## FAQ
+
+**Which username do I use?** The API username and password of your kwtSMS account, not your mobile number.
+
+**Why do test messages not arrive?** Test mode queues messages without delivering them; their credits are held until
+you delete them from the Sending Queue in your kwtSMS account. Turn test mode off in Settings.
+
+**What is a Sender ID?** The name shown as the sender on the phone. See the
+[Sender ID help](https://www.kwtsms.com/sender-id-help.html).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Support
 
-- **Support portal**: [kwtsms.com/support.html](https://www.kwtsms.com/support.html)
-- **FAQ**: [kwtsms.com/faq/](https://www.kwtsms.com/faq/)
-- **Sender ID help**: [kwtsms.com/sender-id-help.html](https://www.kwtsms.com/sender-id-help.html)
-- **Issues**: [drupal.org/project/issues/kwtsms](https://www.drupal.org/project/issues/kwtsms)
+Help: https://www.kwtsms.com/support.html | FAQ: https://www.kwtsms.com/faq/ |
+API: [developers](https://www.kwtsms.com/developers.html), [API reference](https://www.kwtsms.com/api-documentation.html) |
+[Issues](https://www.drupal.org/project/issues/kwtsms)
 
 ## License
 
-GPL-2.0-or-later. See [LICENSE.txt](LICENSE.txt) for details.
+GPL-2.0-or-later, (c) kwtSMS (BoxLink Center). See [LICENSE.txt](LICENSE.txt).
 
