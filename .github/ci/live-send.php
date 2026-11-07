@@ -19,7 +19,8 @@ $gateway = \Drupal::service('kwtsms.gateway');
 $login = $gateway->login((string) getenv('KWTSMS_USERNAME'), (string) getenv('KWTSMS_PASSWORD'));
 echo 'login: ' . json_encode(['success' => $login['success'] ?? NULL]) . "\n";
 if (empty($login['success'])) {
-  exit(1);
+  // drush php:script treats exit() as an abnormal end, so failures throw.
+  throw new \RuntimeException('kwtSMS login failed');
 }
 $result = $gateway->sendTestSms((string) getenv('KWTSMS_TEST_NUMBER'), 'QA-drupal-ci ' . gmdate('YmdHi'));
 $api = $result['api_response'] ?? [];
@@ -27,4 +28,6 @@ echo 'result: ' . json_encode([
   'success' => $result['success'] ?? NULL,
   'api' => array_intersect_key($api, array_flip(['result', 'code', 'description', 'numbers', 'points-charged'])),
 ]) . "\n";
-exit(!empty($result['success']) ? 0 : 1);
+if (empty($result['success'])) {
+  throw new \RuntimeException('kwtSMS test send failed');
+}
