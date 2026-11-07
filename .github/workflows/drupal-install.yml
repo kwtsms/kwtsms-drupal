@@ -1,0 +1,74 @@
+# FILE:      .github/workflows/drupal-install.yml
+# CREATED:   2026-11-07 10:05 +03
+# TASK:      drupal-ci-install
+# AUTHOR:    M Alhassoun
+# WHAT:      Creates a fresh Drupal 10 (PHP 8.3) and Drupal 11 (PHP 8.4) site on SQLite, requires this module through
+#            composer as a site would, enables it with drush and checks its tables; on Drupal 11, logs in and sends
+#            one SMS with sendTestSms() (always test=1) to the test number (queued, never delivered).
+# WHY:       1.1.0's first test SMS failed with ERR002 on a new install; this job runs that path before a release.
+# USAGE:     Runs on pull requests to main and by hand (Actions > Drupal install > Run workflow).
+# DEPENDS:   Secrets KWTSMS_USERNAME, KWTSMS_PASSWORD, KWTSMS_TEST_NUMBER for the live step (skipped when absent).
+name: Drupal install
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Drupal ${{ matrix.drupal }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - drupal: "^10.3"
+            php: "8.3"
+            live: false
+          - drupal: "^11"
+            php: "8.4"
+            live: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, pdo_sqlite, sqlite3, mbstring, xml, curl, zip
+          tools: composer:v2
+
+      - name: Create the Drupal site
+        run: |
+          composer create-project --no-interaction --no-progress "drupal/recommended-project:${{ matrix.drupal }}" site
+          cd site
+          composer require --no-interaction --no-progress drush/drush
+          composer config repositories.kwtsms path "$GITHUB_WORKSPACE"
+          composer require --no-interaction --no-progress "drupal/kwtsms:*@dev"
+          vendor/bin/drush site:install minimal --db-url="sqlite://sites/default/files/.ht.sqlite" \
+            --account-pass="ci$(openssl rand -hex 8)" -y
+          vendor/bin/drush status --field=drupal-version
+
+      - name: Enable the module
+        working-directory: site
+        run: |
+          vendor/bin/drush en kwtsms -y
+          vendor/bin/drush pm:list --status=enabled --filter=kwtsms --format=list | tee enabled.txt
+          grep -qx kwtsms enabled.txt
+          vendor/bin/drush sql:query "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'kwtsms%'" | tee tables.txt
+          [ "$(grep -c . tables.txt)" -eq 3 ]
+
+      - name: One live send through the module (test=1)
+        if: matrix.live
+        working-directory: site
+        env:
+          KWTSMS_USERNAME: ${{ secrets.KWTSMS_USERNAME }}
+          KWTSMS_PASSWORD: ${{ secrets.KWTSMS_PASSWORD }}
+          KWTSMS_TEST_NUMBER: ${{ secrets.KWTSMS_TEST_NUMBER }}
+        run: |
+          if [ -z "$KWTSMS_USERNAME" ] || [ -z "$KWTSMS_TEST_NUMBER" ]; then echo "No credentials (fork?): skipped"; exit 0; fi
+          vendor/bin/drush php:script "$GITHUB_WORKSPACE/.github/ci/live-send.php"
