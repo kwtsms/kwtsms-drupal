@@ -49,9 +49,11 @@ jobs:
         env:
           DRUPALORG_TOKEN: ${{ secrets.DRUPALORG_TOKEN }}
           GIT_TAG_REF: ${{ github.ref }}
+        # 2026-11-07 14:13 +03: a tag checkout has no local "main" ("src refspec main does not match any", v1.1.1), so push
+        # GitHub's origin/main instead; no --force, so drupal.org history is only ever fast-forwarded. Task drupal-mirror-fix.
         run: |
           git remote add drupalorg "https://oauth2:${DRUPALORG_TOKEN}@git.drupalcode.org/project/kwtsms.git"
-          git push drupalorg main --force
+          git push drupalorg origin/main:refs/heads/main
           TAG="${GIT_TAG_REF#refs/tags/v}"
-          git tag "$TAG" HEAD 2>/dev/null || true
-          git push drupalorg "$TAG" --force
+          git tag "$TAG" HEAD
+          git push drupalorg "refs/tags/$TAG"
