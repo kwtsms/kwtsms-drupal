@@ -4,6 +4,12 @@ All notable changes to the kwtSMS module will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-07
+
+### Fixed
+- The test SMS and sends failed with ERR002 while no Sender ID was chosen yet (right after the first gateway login). The module now uses KWT-SMS until you choose one.
+- kwtSMS error details (code and description) are shown again; a 4xx answer from kwtSMS used to appear only as "API request failed".
+
 ### Added
 - Requests to kwtSMS carry the integration name and version (no personal data) so kwtSMS can see which integrations are in use.
 

@@ -148,7 +148,7 @@ class KwtsmsGateway {
     }
 
     $testMode = (bool) $config->get('test_mode');
-    $senderId = (string) ($config->get('sender_id') ?? '');
+    $senderId = $this->getSenderId();
 
     // Step 4: clean message.
     $message = $this->messageCleaner->clean($message);
@@ -500,6 +500,21 @@ class KwtsmsGateway {
   }
 
   /**
+   * The Sender ID to send with: the chosen one, or KWT-SMS when none is set.
+   *
+   * 2026-11-07 03:20 +03: with no Sender ID chosen yet (right after the first
+   * gateway login) an empty sender was sent and kwtSMS answered ERR002. Found
+   * in the Drupal 11 Docker QA, task int-rerelease-number.
+   *
+   * @return string
+   *   The Sender ID.
+   */
+  private function getSenderId(): string {
+    $senderId = (string) ($this->configFactory->get('kwtsms.settings')->get('sender_id') ?? '');
+    return $senderId !== '' ? $senderId : 'KWT-SMS';
+  }
+
+  /**
    * Sends a test SMS to a single phone number.
    *
    * Always uses test mode regardless of the module's test_mode config.
@@ -515,8 +530,8 @@ class KwtsmsGateway {
    *   Result array with keys 'success', 'api_response', and 'message'.
    */
   public function sendTestSms(string $phone, string $message): array {
-    $config   = $this->configFactory->get('kwtsms.settings');
-    $senderId = (string) ($config->get('sender_id') ?? '');
+    // 2026-11-07 03:20 +03: same Sender ID fallback as send(). Task int-rerelease-number.
+    $senderId = $this->getSenderId();
 
     $normalized   = $this->phoneNormalizer->normalize($phone);
     $verification = $this->phoneNormalizer->verify($normalized);
@@ -754,6 +769,10 @@ class KwtsmsGateway {
         ],
         'json'    => $payload,
         'timeout' => 30,
+        // 2026-11-07 03:19 +03: kwtSMS answers errors with HTTP 400/403 and a
+        // JSON body (code, description). Without this Guzzle threw on 4xx and
+        // the admin saw only "API request failed". Task int-rerelease-number.
+        'http_errors' => FALSE,
       ]);
 
       $body = (string) $response->getBody();
