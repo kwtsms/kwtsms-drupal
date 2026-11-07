@@ -34,7 +34,10 @@ jobs:
             php: "8.4"
             live: true
     steps:
+      # Module in its own folder: a path repository pointing at the workspace root would symlink the site into itself.
       - uses: actions/checkout@v7
+        with:
+          path: module
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -47,7 +50,7 @@ jobs:
           composer create-project --no-interaction --no-progress "drupal/recommended-project:${{ matrix.drupal }}" site
           cd site
           composer require --no-interaction --no-progress drush/drush
-          composer config repositories.kwtsms path "$GITHUB_WORKSPACE"
+          composer config repositories.kwtsms path "$GITHUB_WORKSPACE/module"
           composer require --no-interaction --no-progress "drupal/kwtsms:*@dev"
           vendor/bin/drush site:install minimal --db-url="sqlite://sites/default/files/.ht.sqlite" \
             --account-pass="ci$(openssl rand -hex 8)" -y
@@ -71,4 +74,4 @@ jobs:
           KWTSMS_TEST_NUMBER: ${{ secrets.KWTSMS_TEST_NUMBER }}
         run: |
           if [ -z "$KWTSMS_USERNAME" ] || [ -z "$KWTSMS_TEST_NUMBER" ]; then echo "No credentials (fork?): skipped"; exit 0; fi
-          vendor/bin/drush php:script "$GITHUB_WORKSPACE/.github/ci/live-send.php"
+          vendor/bin/drush php:script "$GITHUB_WORKSPACE/module/.github/ci/live-send.php"
