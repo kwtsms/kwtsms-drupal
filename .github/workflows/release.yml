@@ -55,5 +55,5 @@ jobs:
           git remote add drupalorg "https://oauth2:${DRUPALORG_TOKEN}@git.drupalcode.org/project/kwtsms.git"
           git push drupalorg origin/main:refs/heads/main
           TAG="${GIT_TAG_REF#refs/tags/v}"
-          git tag -a "$TAG" -m "$TAG" HEAD
+          git tag "$TAG" HEAD
           git push drupalorg "refs/tags/$TAG"
