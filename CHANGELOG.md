@@ -34,7 +34,7 @@ All notable changes to the kwtSMS module will be documented in this file.
 ### Fixed
 - Coverage filter now correctly uses flat prefix array instead of nested response
 - `error_code` column widened from varchar(10) to varchar(32)
-- Generic error messages on all OTP/2FA forms to prevent account enumeration
+- Security fix.
 - All phpcs Drupal/DrupalPractice errors and warnings resolved (zero remaining)
 - Proper dependency injection throughout (no `\Drupal::` static calls in classes)
 - `TimeInterface` namespace corrected (`Component\Datetime`) for Drupal 10.3 compatibility
